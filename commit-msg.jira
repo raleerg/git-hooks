@@ -1,0 +1,43 @@
+#!/bin/sh
+
+## COMMIT-MSG GIT HOOK
+
+#####################################################################
+# Check and add Jira ticket number in commit message if its missing #
+#####################################################################
+
+# OUTPUT COLORS
+COLOR_OFF='\033[0m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+GREEN='\033[0;32m'
+
+# REGEX
+COMMIT_MSG_REGEX="^([A-Z]{4}-[0-9]{4}|merge)"
+JIRA_TICKET_GREP_REGEX="[A-Z]\+[-][0-9{4}]\+"
+
+# MESSAGES
+JIRA_TICKET_MISSING_MSG="${YELLOW}Jira ticket number is missing.${COLOR_OFF}"
+ADD_JIRA_TICKET_MSG="${RED}Add your Jira ticket number in commit message, and try again.${COLOR_OFF}"
+ADD_JIRA_TICKET_NUMBER_MSG="Add Jira ticket number in commit message"
+JIRA_TICKET_NUMBER_SUCCESSFULLY_ADDED_MSG="${GREEN}Done!${COLOR_OFF}"
+
+getJiraTicketNumber () {
+	branchName=$(git branch --show-current)
+	echo $branchName | grep -o  "$JIRA_TICKET_GREP_REGEX"
+}
+
+if ! grep -iqE "$COMMIT_MSG_REGEX" "$1"; then
+    echo $JIRA_TICKET_MISSING_MSG
+    jiraNumber=$(getJiraTicketNumber)
+    read -n1 -p "$ADD_JIRA_TICKET_NUMBER_MSG ($jiraNumber)? [y/n]" doit < /dev/tty
+
+    if [ $doit == 'y' ]
+	then
+ 		echo "$jiraNumber $(cat $1)" > $1
+ 		echo "\n"$JIRA_TICKET_NUMBER_SUCCESSFULLY_ADDED_MSG
+ 	else
+ 		echo "\n"$ADD_JIRA_TICKET_MSG
+ 		exit 1
+	fi
+fi
