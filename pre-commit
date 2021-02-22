@@ -1,16 +1,17 @@
 #!/bin/sh
 
 # BRANCH NAMING POLICY
-BRANCH_NAME_REGEX="(^feature\/)|(^bugfix\/)"
-JIRA_BRANCH_NAME_REGEX="((^feature\/)|(^bugfix\/))(([A-Z]{4}-[0-9]{4}|merge))"
+GIT_FLOW_REGEX="(^feature\/)|(^bugfix\/)|(^hotfix\/)"
+JIRA_BRANCH_NAME_REGEX="($GIT_FLOW_REGEX)(([A-Z]{4}-[0-9]{4}|merge))"
 
-ERROR_BRANCH_NAME="'feature' or 'bugfix' is missing from the branch name."
+# ERROR MESSAGES
+ERROR_BRANCH_NAME="feature, bugfix or hotfix is missing from the branch name."
 ERROR_JIRA_BRANCH_NAME="Jira ticket number is missing from the branch name."
 
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
 error=""
 
-if [[ ! $current_branch =~ $BRANCH_NAME_REGEX ]]
+if [[ ! $current_branch =~ $GIT_FLOW_REGEX ]]
 then
     echo "$ERROR_BRANCH_NAME"
     exit 1
@@ -21,7 +22,3 @@ then
     echo "$ERROR_JIRA_BRANCH_NAME"
     exit 1
 fi
-
-#echo "${BASH_REMATCH[5]}"
-
-#printf '%s\n' "${BASH_REMATCH[@]}"
